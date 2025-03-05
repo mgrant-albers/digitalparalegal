@@ -38,6 +38,36 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+/*
+*    This code stills contains some vestigial lines and methods from the development process. I have left these in intentionally 
+* to demonstrate to the reader how this code reached its current state, and what my thought process was. This was my first attempt
+* at building something for the Android platform and as such there was a large amount of experimentation to see what worked and 
+* what did not. This project was an excellent lesson in interacting with frameworks, writing code for maximum compatibility 
+* and writing code for a small device with less computing resources. 
+* 
+*    First, the reader will certainly notice elementary logging, including a timer for tracking the process length. This 
+* was an important lesson in debugging for me, as with smaller projects I had done in school lent themselves to using a step-by-step 
+* debugger or printing to the terminal. A large initial hurdle for me in this project was the Android lifecycle, logging the various 
+* components helped me to very quickly identify where problems were occurring. 
+*
+*    The reader will also likely notice some IO methods which are currently unused. I wanted to experiment with the idea of skipping 
+* a substantial sorting operation which occurs after all MMS and SMS messages in the device have been collected. The idea was to
+* write each message to disk with the timestamp as the file name, therefore requiring only as an array of long primitives to be sorted as opposed
+* to sorting and merging a large TreeMap. However, this caused a more substantial slowdown. I learned that the IO operations I had 
+* been experimenting with on my laptop involved virtual threads which were unavailable to me given the device compatibility restraints 
+* here, and that utilizing the abstractions provided by the Android was causing additional overhead. This was an extremely valuable 
+* lesson. It taught me most importantly how deep a programmer's understanding of a framework must be to utilize it correctly, particularly
+* in a situation where said framework is not optimal for the use case at hand. 
+*
+*    While there is room for further optimization I am generally pleased with the performance of this app. It meets the goals set out at 
+* the beginning of the project and was completed in the time I had allotted for it. It is exponentially faster than the app I had been 
+* using previously and its footprint in device storage is minimal. As of now, the performance bottleneck is writing large PDF files. 
+* Small files are usually complete by the time the user selects a directory and names the document, very large documents are completed
+* in the background and notify the user when complete. This operation is not very resource intensive and the phone can be used normally 
+* while this occurs, a PDF document 700 pages long takes roughly two minutes.  
+*     
+*/
+
 public class MainActivity extends AppCompatActivity {
     private static final int ALL_PERMISSIONS = 101;
     private static final String CHANNEL_ID = "notification";
@@ -52,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<Intent> pdfLauncher;
     public Uri uri;
 
-    //Handled by pre and post API 33 permissions requests
+    //Handled by pre and post API 33 permissions requests.
     @SuppressLint("InlinedApi")
     private final String[] permissions = { Manifest.permission.READ_SMS, Manifest.permission.POST_NOTIFICATIONS};
 
