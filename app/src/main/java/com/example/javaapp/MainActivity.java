@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity {
 
     private String formatNumber(String s){
         String output;
+        s = s.replaceAll("\\p{Punct}", "");
         if(s.length() > 8 && !s.contains("@")){
             if(s.charAt(0) == '+'){
                 s = s.substring(2);
