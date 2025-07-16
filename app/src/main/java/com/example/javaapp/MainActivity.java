@@ -78,13 +78,10 @@ public class MainActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == ALL_PERMISSIONS) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
 
-                logicInit();
-            }
-            else {
-                Log.v("ON REQUEST", "DENIED");
-            }
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) { logicInit(); }
+
+            else { Log.v("ON REQUEST", "DENIED"); }
         }
     }
     private void preTiramisuPermissions(){
@@ -191,8 +188,7 @@ public class MainActivity extends AppCompatActivity {
         updateSpinner();
     }
     private void mainLogic(){
-        long startTime = System.currentTimeMillis();
-        long endTime = 0L;
+
         String phoneNumber = (String) conversationSpinner.getSelectedItem();
         String userNum = formatNumber(userNumber.getText().toString());
 
@@ -205,7 +201,9 @@ public class MainActivity extends AppCompatActivity {
             getDocumentPermissions();
             return null;
         });
-
+        /*The following loop is a very inelegant way to block the thread which needs to wait for the URI from the Android API.
+         * The usual methods weren't working because the thread carrying out the task is handled by Android. I would like to find a better way.
+         * */
         try {
             long[] filenames = futureArray.get();
             pdfPermission.get();
@@ -217,19 +215,14 @@ public class MainActivity extends AppCompatActivity {
             }
             extract.writeMapToPdf(this, uri, filenames);
             sendNotification();
-
-            endTime = System.currentTimeMillis();
         }
-        catch(InterruptedException | ExecutionException e){
-            Log.e("MainLogic Catch", "Something fucked up", e);
-        }
+        catch(InterruptedException | ExecutionException e){ Log.e("MainLogic Catch", "Thread exception", e); }
         finally{
-            Log.i("Total Time:", String.valueOf((endTime - startTime)/1000L));
+
             extract.clearCache();
             extract.endExtract();
         }
         Log.i("MainLogic", "End of Method");
-
     }
     private void updateSpinner(){
 
@@ -240,6 +233,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
     private void clearSpinner(){
+
         new Handler(Looper.getMainLooper()).post(() ->{
             ArrayAdapter<String> adapter = (ArrayAdapter<String>) conversationSpinner.getAdapter();
             adapter.clear();
@@ -249,6 +243,7 @@ public class MainActivity extends AppCompatActivity {
     private String[] makeHeaders(String user, String target){ return new String[] {user, target};}
 
     private String formatNumber(String s){
+
         String output;
         s = s.replaceAll("\\p{Punct}", "");
         if(s.length() > 8 && !s.contains("@")){
@@ -262,6 +257,7 @@ public class MainActivity extends AppCompatActivity {
             return s;
     }
     private void initExtract(){
+
         pdfLauncher = registerForActivityResult(
                 new ActivityResultContracts.StartActivityForResult(),
                 result -> {
@@ -275,6 +271,7 @@ public class MainActivity extends AppCompatActivity {
         );
     }
     public void getDocumentPermissions() {
+
         Intent intent = new Intent(Intent.ACTION_CREATE_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("application/pdf");
@@ -283,6 +280,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void createNotificationChannel() {
+
             CharSequence name = "Digital ParaLegal";
             String description = "Your PDF is ready.";
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -295,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
     //Potential permissions issue handled
     @SuppressLint("MissingPermission")
     private void sendNotification() {
+
         NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_launcher_background)
                 .setContentTitle("Digital ParaLegal")
@@ -307,6 +306,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(notificationId, builder.build());
     }
     private void displayHelpMessage(){
+
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Instructions:");
         builder.setMessage("First, enter your complete phone number into the text box.\n\n" +

@@ -19,6 +19,7 @@ public class GetMmsTask implements Callable<long[]> {
 
 
     public GetMmsTask(ContentResolver contentResolver, String threadId, String[] headers, ConcurrentHashMap<Long, String> mapIn){
+
         this.contentResolver = contentResolver;
         this.threadId = threadId;
         this.mapIn = mapIn;
@@ -30,6 +31,7 @@ public class GetMmsTask implements Callable<long[]> {
     public long[] call()  { return getMmsByAddress(contentResolver, threadId, mapIn); }
 
     private long[] getMmsByAddress(ContentResolver contentResolver, String threadId, ConcurrentHashMap<Long, String> mapIn) {
+
         Log.i("MMS Task", "Reached");
 
         long[] datesOut = null;
@@ -62,10 +64,10 @@ public class GetMmsTask implements Callable<long[]> {
             }
         }
         Log.i("MMS Task", "Complete");
-
         return datesOut;
     }
     private static String getBody(ContentResolver contentResolver, String messageId){
+
         Uri partUri = Uri.parse("content://mms/part");
         String selection = "mid=" + messageId;
         StringBuilder bodyOut = new StringBuilder();

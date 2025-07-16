@@ -26,6 +26,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
+/*The executor service in this class should be replaced with a reference to the executor service in the main method.
+*This was left over from an earlier iteration in development and is now just inefficient.
+*It would also have been better to write my own content provider which would perform a table join on MMS and SMS tables
+*instead of querying them independently and merging the results.
+*/
 public class ExtractMessages{
 
     protected final String[] headers;
@@ -35,7 +40,6 @@ public class ExtractMessages{
     protected ConcurrentHashMap<Long, String> extractMap;
     protected final File cacheDirectory;
     private static final String TAG = "EXTRACTION";
-
 
     public ExtractMessages(Context context, String threadId, String[] headers){
         this.headers = headers;
@@ -57,9 +61,7 @@ public class ExtractMessages{
         this.cacheDirectory = input.cacheDirectory;
     }
 
-    public void endExtract(){
-        executorService.shutdown();
-    }
+    public void endExtract(){ executorService.shutdown(); }
     public void writeMapToPdf(Context context, Uri uriIn, long[] filenames) {
 
         Log.i(TAG, "Write Map Reached");
@@ -84,17 +86,14 @@ public class ExtractMessages{
                         strBuild.setLength(0);
                     }
                 }
-                if(strBuild.length() > 0){
-                    document.add(new Paragraph(strBuild.toString()));
-                }
+                if(strBuild.length() > 0){ document.add(new Paragraph(strBuild.toString())); }
             }
-            catch(IOException e){
-                Log.e("IO", "FAILURE", e);
-            }
+            catch(IOException e){ Log.e("IO", "FAILURE", e); }
         Log.i("IO", "COMPLETE");
     }
-
+    //Intended for writing the PDF if Messages written to disk. This is potentially still useful in situations where WriteTask would be used.
     public static void writePdf(Context context, Uri uriIn, long[] fileNames){
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
         String tempDirectory = context.getCacheDir().getAbsolutePath();
         Map<String, String> fileContent = filesToMap(context.getCacheDir());
@@ -110,14 +109,12 @@ public class ExtractMessages{
 
                 ZonedDateTime date = getTime(fileId);
                 document.add(new Paragraph(date.format(formatter) + ": " + fileContent.get(String.valueOf(fileId))));
-
             }
         }
-        catch(IOException e){
-            Log.e("PDF write", "Failure", e);
-        }
+        catch(IOException e){ Log.e("PDF write", "Failure", e); }
     }
     public static Map<String, String> filesToMap(File directory){
+
         try{
             return Arrays.stream(directory.listFiles())
                     .parallel()
@@ -131,23 +128,19 @@ public class ExtractMessages{
                                     Log.e(TAG, "stream", e);
                                     return "";
                                 }
-                            }
-                    ));
+                            }));
         }
-        catch(Exception e){
-            Log.e(TAG, "Map method error");
-        }
+        catch(Exception e){ Log.e(TAG, "Map method error"); }
         return Map.of();
     }
     public void clearCache(){
-        File[] cacheFiles = cacheDirectory.listFiles();
 
+        File[] cacheFiles = cacheDirectory.listFiles();
         assert cacheFiles != null;
-        for(File file : cacheFiles){
-            executorService.execute(file::delete);
-        }
+        for(File file : cacheFiles){ executorService.execute(file::delete); }
     }
     private static ZonedDateTime getTime(long timestamp){
+
         Instant instant = Instant.ofEpochMilli(timestamp);
         return instant.atZone(ZoneId.systemDefault());
     }

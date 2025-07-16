@@ -10,7 +10,6 @@ import java.util.concurrent.Future;
 import java.util.stream.LongStream;
 
 public class ExtractAllMsgTask extends ExtractMessages implements Callable<long[]> {
-    private final String TAG = "ExtractAllMsgTask";
     private final ContentResolver contentResolver;
 
     public ExtractAllMsgTask(ExtractMessages input){
@@ -20,6 +19,8 @@ public class ExtractAllMsgTask extends ExtractMessages implements Callable<long[
 
     @Override
     public long[] call() {
+
+        String TAG = "ExtractAllMsgTask";
         Log.i(TAG, "Reached");
         ArrayList<long[]> tempList = new ArrayList<>();
         ArrayList<Callable<long[]>> taskList = new ArrayList<>();

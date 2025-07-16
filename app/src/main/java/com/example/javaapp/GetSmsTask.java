@@ -17,6 +17,7 @@ public class GetSmsTask implements Callable<long[]> {
     private final String TO_HEADER;
 
     public GetSmsTask(ContentResolver contentResolver, String threadId, String[] headers, ConcurrentHashMap<Long, String> mapIn){
+
         this.contentResolver = contentResolver;
         this.threadId = threadId;
         this.mapIn = mapIn;
@@ -48,25 +49,17 @@ public class GetSmsTask implements Callable<long[]> {
 
                     String messageBody = cursor.getString(bodyIndex);
                     long dateSent = cursor.getLong(dateIndex);
-                    if(messageBody == null){
-                        messageBody = " ";
-                    }
+                    if(messageBody == null){ messageBody = " "; }
 
-                    if(cursor.getInt(msgType) == Telephony.Sms.MESSAGE_TYPE_INBOX) {
+                    if(cursor.getInt(msgType) == Telephony.Sms.MESSAGE_TYPE_INBOX) { mapIn.put(dateSent, TO_HEADER + messageBody); }
+                    else{ mapIn.put(dateSent, FROM_HEADER + messageBody); }
 
-                        mapIn.put(dateSent, TO_HEADER + messageBody);
-                    }
-                    else{
-
-                        mapIn.put(dateSent, FROM_HEADER + messageBody);
-                    }
                     datesOut[index] = dateSent;
                     index++;
                 }
             }
         }
         Log.i("SMS Task", "Complete");
-
         return datesOut;
     }
 }
